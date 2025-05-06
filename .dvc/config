@@ -1,0 +1,5 @@
+[core]
+    remote = llm-fine-tuning
+    autostage = true
+['remote "llm-fine-tuning"']
+    url = s3://llm-fine-tuning-dvc/llm-fine-tuning
