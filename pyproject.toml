@@ -5,6 +5,16 @@ description = "ChainLit LLM interface to compare documents."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "accelerate>=1.6.0",
+    "datasets>=3.5.1",
+    "dotenv>=0.9.9",
+    "huggingface-hub>=0.30.2",
+    "llama-stack>=0.2.5",
+    "mlflow>=2.22.0",
+    "sentencepiece>=0.2.0",
+    "torch>=2.7.0",
+    "torchvision>=0.22.0",
+    "transformers>=4.51.3",
 ]
 [dependency-groups]
 dev = [
