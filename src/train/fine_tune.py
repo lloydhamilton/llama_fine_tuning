@@ -1,3 +1,5 @@
+import os
+
 import torch
 from datasets import (
     Dataset,
@@ -10,6 +12,8 @@ from peft import (
     LoraConfig,
     get_peft_model,
     prepare_model_for_kbit_training,
+    PeftModelForCausalLM,
+    PeftModel,
 )
 from transformers import (
     AutoModelForCausalLM,
@@ -22,9 +26,10 @@ from trl import SFTConfig, SFTTrainer
 
 load_dotenv("../.env")
 
-# TODO: Updated DVC to be able to download. Write method to get predictions. Early stopping & epochs. MLFLow.
+# TODO: Write method to get predictions. Early stopping & epochs. MLFLow.
 
 HUGGING_FACE_MODEL = "meta-llama/Llama-3.2-3B-Instruct"
+CURRENT_DIR = os.path.dirname(__file__)
 q_cfg = QuantoConfig(weights="int8")
 lora_cfg = LoraConfig(
     r=16,
@@ -83,38 +88,6 @@ class CustomFineTuner:
         hf_dataset = load_dataset(dataset_name, split=split)
         return hf_dataset
 
-    def fetch_huggingface_tokenizer(self) -> PreTrainedTokenizer:
-        """Fetch the tokenizer from Huggingface."""
-        hf_tokenizer = AutoTokenizer.from_pretrained(
-            pretrained_model_name_or_path=self.huggingface_model,
-            trust_remote_code=True,
-        )
-        if hf_tokenizer.pad_token_id is None:
-            hf_tokenizer.pad_token_id = hf_tokenizer.eos_token_id
-        return hf_tokenizer
-
-    def fetch_model(self) -> LlamaForCausalLM:
-        """Fetch the Llama model from Huggingface."""
-        config = dict(
-            pretrained_model_name_or_path=self.huggingface_model,
-            return_dict=True,
-            low_cpu_mem_usage=True,
-            # torch_dtype=torch.float16,
-            device_map="auto",
-            trust_remote_code=True,
-        )
-        if self.quantization_config is not None:
-            quant_cfg = {
-                "quantization_config": self.quantization_config,
-            }
-            config = config | quant_cfg
-
-        model = AutoModelForCausalLM.from_pretrained(**config)
-        if model.config.pad_token_id is None:
-            model.config.pad_token_id = model.config.eos_token_id
-        self.log_trainable_params(model, self.huggingface_model)
-        return model
-
     @staticmethod
     def log_trainable_params(model: torch.nn.modules, model_name: str) -> int:
         """Get the number of trainable parameters in the model."""
@@ -166,13 +139,59 @@ class CustomFineTuner:
         ]
         return {"messages": message_template}
 
+    def load_model_from_checkpoints(self, checkpoint_path: str) -> PeftModel:
+        """Load model from checkpoint."""
+        model = AutoModelForCausalLM.from_pretrained(
+            self.huggingface_model,
+            device_map="auto",
+        )
+        model = PeftModel.from_pretrained(
+            model,
+            checkpoint_path,
+            device_map="auto",
+        )
+
+        return model
+
+    def fetch_huggingface_tokenizer(self) -> PreTrainedTokenizer:
+        """Fetch the tokenizer from Huggingface."""
+        hf_tokenizer = AutoTokenizer.from_pretrained(
+            pretrained_model_name_or_path=self.huggingface_model,
+            trust_remote_code=True,
+        )
+        if hf_tokenizer.pad_token_id is None:
+            hf_tokenizer.pad_token_id = hf_tokenizer.eos_token_id
+        return hf_tokenizer
+
+    def fetch_model(self) -> LlamaForCausalLM:
+        """Fetch the Llama model from Huggingface."""
+        config = dict(
+            pretrained_model_name_or_path=self.huggingface_model,
+            return_dict=True,
+            low_cpu_mem_usage=True,
+            # torch_dtype=torch.float16,
+            device_map="auto",
+            trust_remote_code=True,
+        )
+        if self.quantization_config is not None:
+            quant_cfg = {
+                "quantization_config": self.quantization_config,
+            }
+            config = config | quant_cfg
+
+        model = AutoModelForCausalLM.from_pretrained(**config)
+        if model.config.pad_token_id is None:
+            model.config.pad_token_id = model.config.eos_token_id
+        self.log_trainable_params(model, self.huggingface_model)
+        return model
+
     def train(self, train_dataset: Dataset) -> None:
         """Training entry point."""
         model_to_train = self.fetch_model()
         processed_dataset = train_dataset.map(self.apply_message_template)
         model_to_train.train()
         training_args = SFTConfig(
-            output_dir="cp",
+            output_dir=os.path.join(CURRENT_DIR, "../checkpoints"),
             per_device_train_batch_size=1,
             gradient_accumulation_steps=1,
             per_device_eval_batch_size=1,
