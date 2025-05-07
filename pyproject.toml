@@ -12,11 +12,15 @@ dependencies = [
     "dvc-s3>=3.2.0",
     "huggingface-hub>=0.30.2",
     "llama-stack>=0.2.5",
+    "loguru>=0.7.3",
     "mlflow>=2.22.0",
+    "optimum-quanto>=0.2.7",
+    "peft>=0.15.2",
     "sentencepiece>=0.2.0",
     "torch>=2.7.0",
     "torchvision>=0.22.0",
     "transformers>=4.51.3",
+    "trl>=0.17.0",
 ]
 [dependency-groups]
 dev = [
