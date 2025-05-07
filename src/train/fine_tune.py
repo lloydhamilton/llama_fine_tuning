@@ -1,5 +1,7 @@
 import os
+import uuid
 
+import mlflow
 import torch
 from datasets import (
     Dataset,
@@ -8,12 +10,12 @@ from datasets import (
 )
 from dotenv import load_dotenv
 from loguru import logger as log
+from mlflow.models import infer_signature
 from peft import (
     LoraConfig,
+    PeftModel,
     get_peft_model,
     prepare_model_for_kbit_training,
-    PeftModelForCausalLM,
-    PeftModel,
 )
 from transformers import (
     AutoModelForCausalLM,
@@ -187,10 +189,14 @@ class CustomFineTuner:
 
     def train(self, train_dataset: Dataset) -> None:
         """Training entry point."""
+        mlflow.set_experiment(f"{self.huggingface_model}-finetune")
         model_to_train = self.fetch_model()
         processed_dataset = train_dataset.map(self.apply_message_template)
+        log.debug(f"Sample dataset: {processed_dataset[0]}")
         model_to_train.train()
         training_args = SFTConfig(
+            report_to="mlflow",
+            run_name=f"{self.huggingface_model}-finetune-{uuid.uuid4().hex[:6]}",
             output_dir=os.path.join(CURRENT_DIR, "../checkpoints"),
             per_device_train_batch_size=1,
             gradient_accumulation_steps=1,
@@ -201,7 +207,7 @@ class CustomFineTuner:
             logging_steps=10,
             learning_rate=5e-5,
             max_grad_norm=0.3,
-            max_steps=60,
+            max_steps=10,
             warmup_ratio=0.03,
             # eval_strategy="steps",
             lr_scheduler_type="linear",
@@ -214,6 +220,28 @@ class CustomFineTuner:
             peft_config=self.lora_config,
         )
         trainer.train()
+
+    def mlflow_log_model(self, trainer: SFTTrainer) -> None:
+        """Log the model to MLflow."""
+        last_run_id = mlflow.last_active_run().info.run_id
+        # Save a tokenizer without padding because it is only needed for training
+        tokenizer_no_pad = AutoTokenizer.from_pretrained(
+            self.huggingface_model, add_bos_token=True
+        )
+        with mlflow.start_run(run_id=last_run_id):
+            mlflow.log_params(self.lora_config.to_dict())
+            mlflow.transformers.log_model(
+                transformers_model=dict(
+                    model=trainer.model, tokenizer=tokenizer_no_pad
+                ),
+                artifact_path="model",
+                signature=infer_signature(
+                    model_input={
+                        "role": "user",
+                        "content": "What is in front of the Notre Dame Main Building?",
+                    },
+                ),
+            )
 
 
 if __name__ == "__main__":
