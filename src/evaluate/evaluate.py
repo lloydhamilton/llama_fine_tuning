@@ -7,6 +7,7 @@ import pandas as pd
 from datasets import load_dataset
 from dotenv import load_dotenv
 from transformers.pipelines.base import Dataset
+from mlflow.metrics import rougeLsum
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 
@@ -37,6 +38,9 @@ class EvaluateLLMModel:
         squad_pd = pd.DataFrame(data[:5])
         answers = pd.json_normalize(squad_pd["answers"])
         squad_pd["answers"] = answers["text"]
+        squad_pd["answers"] = squad_pd["answers"].apply(
+            lambda x: ", ".join(x) if isinstance(x, list) else x
+        )
         squad_pd["role"] = "user"
         squad_pd["content"] = squad_pd["question"]
         return squad_pd
@@ -52,15 +56,15 @@ class EvaluateLLMModel:
                 self.process_dataset(self.val_squad_dataset),
                 source="squad_dataset",
                 name="squad_dataset",
+                targets="answers",
             )
             mlflow.log_input(eval_dataset, context="llm_evaluation")
             mlflow.evaluate(
                 model=self.model_uri,
                 data=eval_dataset,
-                # targets="answers",
                 model_type="question-answering",
                 evaluators="default",
-                extra
+                extra_metrics=[rougeLsum()],
                 # how to load transformer model from mlflow.
                 # see -> https://www.mlflow.org/docs/latest/llms/transformers/tutorials/fine-tuning/transformers-peft/
             )

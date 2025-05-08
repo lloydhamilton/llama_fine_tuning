@@ -23,6 +23,7 @@ from transformers import (
     LlamaForCausalLM,
     PreTrainedTokenizer,
     QuantoConfig,
+    pipeline,
 )
 from trl import SFTConfig, SFTTrainer
 
@@ -63,7 +64,7 @@ class CustomFineTuner:
         self._huggingface_model_path = huggingface_model
         self._quant_config = quant_config
         self._lora_config = lora_config
-        self.tokenizer = None
+        self.tokeniser = self.fetch_huggingface_tokenizer()
         self.model = None
 
     @property
@@ -140,6 +141,15 @@ class CustomFineTuner:
             {"role": "assistant", "content": answer},
         ]
         return {"messages": message_template}
+
+    @staticmethod
+    def extract_assistant_response(output_text: str) -> str:
+        """Extract content after the assistant header."""
+        if "<|start_header_id|>assistant<|end_header_id|>" in output_text:
+            return output_text.split("<|start_header_id|>assistant<|end_header_id|>")[
+                1
+            ].strip()
+        return output_text
 
     def load_model_from_checkpoints(self, checkpoint_path: str) -> PeftModel:
         """Load model from checkpoint."""
@@ -242,6 +252,24 @@ class CustomFineTuner:
                     },
                 ),
             )
+
+    def generate_predictions(self, pipeline_model: LlamaForCausalLM, input: str) -> str:
+        """Generate predictions from the model."""
+        message = [
+            {"role": "user", "content": input},
+        ]
+        prompt = self.tokeniser.apply_chat_template(
+            message, tokenize=False, add_generation_prompt=True
+        )
+        pipe = pipeline(
+            "text-generation",
+            model=pipeline_model,
+            tokenizer=self.tokeniser,
+            device_map="auto",
+        )
+        with torch.no_grad():
+            outputs = pipe(prompt, max_new_tokens=512, do_sample=True)
+        return self.extract_assistant_response(outputs[0]["generated_text"])
 
 
 if __name__ == "__main__":
