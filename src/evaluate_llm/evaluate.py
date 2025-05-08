@@ -6,8 +6,10 @@ import mlflow
 import pandas as pd
 from datasets import load_dataset
 from dotenv import load_dotenv
+from transformers import Pipeline
 from transformers.pipelines.base import Dataset
-from mlflow.metrics import rougeLsum
+
+from evaluate_llm.metrics.answer_similarity import answer_similarity
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 
@@ -38,13 +40,23 @@ class EvaluateLLMModel:
     @property
     def model(self) -> Pipeline:
         """Load the model from the specified URI."""
-        # Load the model using mlflow
-        if _model is None:
+        if self._model is None:
             model = mlflow.transformers.load_model(self._model_uri)
             self._model = model
         return self._model
 
+    def apply_template(self, content: str) -> str:
+        """Apply the prompt template to the input content."""
+        messages = [{"role": "user", "content": content}]
+        return self.model.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+
     def process_dataset(self, data: Dataset) -> pd.DataFrame:
+        """Process the dataset for evaluation.
+
+        Also preprocess the dataset with the correct prompt template.
+        """
         squad_pd = pd.DataFrame(data[:5])
         answers = pd.json_normalize(squad_pd["answers"])
         squad_pd["answers"] = answers["text"]
@@ -52,10 +64,10 @@ class EvaluateLLMModel:
             lambda x: ", ".join(x) if isinstance(x, list) else x
         )
         squad_pd["role"] = "user"
-        squad_pd["content"] = squad_pd["question"]
+        squad_pd["content"] = squad_pd["question"].apply(self.apply_template)
         return squad_pd
 
-    async def eval_experiment(self):
+    async def eval_experiment(self) -> None:
         uid = uuid.uuid4().hex[:6]
         with mlflow.start_run(
             run_name=f"{self.model_name}-qa-{uid}", tags={"id": uid}
@@ -72,9 +84,9 @@ class EvaluateLLMModel:
             mlflow.evaluate(
                 model=self.model_uri,
                 data=eval_dataset,
-                model_type="question-answering",
-                evaluators="default",
-                extra_metrics=[rougeLsum()],
+                predictions="outputs",
+                extra_metrics=[answer_similarity],
+                evaluator_config={"col_mapping": {"inputs": "answers"}},
                 # how to load transformer model from mlflow.
                 # see -> https://www.mlflow.org/docs/latest/llms/transformers/tutorials/fine-tuning/transformers-peft/
             )
@@ -82,7 +94,7 @@ class EvaluateLLMModel:
 
 if __name__ == "__main__":
     # Example usage
-    model_uri = "runs:/a283232fc9284556b2ae75053b0318fb/model"  # 1B model
+    model_uri = "runs:/ca21d1497bb24fb0a74f7542b2b00bac/model"  # 1B model
     model_name = "Llama-3.2-1B-Instruct"
     evaluator = EvaluateLLMModel(model_uri, model_name)
     asyncio.run(evaluator.eval_experiment())
