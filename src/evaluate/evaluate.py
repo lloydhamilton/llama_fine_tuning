@@ -20,6 +20,7 @@ class EvaluateLLMModel:
         Args:
             model_uri (str): The URI of the model to evaluate.
         """
+        self._model = None
         self._model_name = model_name
         self._model_uri = model_uri
         self.val_squad_dataset = load_dataset("squad", split="validation")
@@ -33,6 +34,15 @@ class EvaluateLLMModel:
     def model_name(self) -> str:
         """Return the model name."""
         return self._model_name
+
+    @property
+    def model(self) -> Pipeline:
+        """Load the model from the specified URI."""
+        # Load the model using mlflow
+        if _model is None:
+            model = mlflow.transformers.load_model(self._model_uri)
+            self._model = model
+        return self._model
 
     def process_dataset(self, data: Dataset) -> pd.DataFrame:
         squad_pd = pd.DataFrame(data[:5])

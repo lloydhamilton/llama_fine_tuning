@@ -193,6 +193,7 @@ class CustomFineTuner:
 
         model = AutoModelForCausalLM.from_pretrained(**config)
         if model.config.pad_token_id is None:
+            log.info("Setting pad_token_id to eos_token_id")
             model.config.pad_token_id = model.config.eos_token_id
         self.log_trainable_params(model, self.huggingface_model)
         return model
@@ -247,7 +248,6 @@ class CustomFineTuner:
                 artifact_path="model",
                 signature=infer_signature(
                     model_input={
-                        "role": "user",
                         "content": "What is in front of the Notre Dame Main Building?",
                     },
                 ),
