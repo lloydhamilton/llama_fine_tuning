@@ -51,7 +51,7 @@ answer_similarity = make_genai_metric(
     ),
     # examples=examples,
     version="v1",
-    model="openai:/o4-mini-2025-04-16",
+    model="openai:/gpt-4.1-mini-2025-04-14",
     parameters={
         "temperature": 0.0,
     },
