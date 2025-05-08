@@ -1,5 +1,7 @@
 from mlflow.metrics.genai import EvaluationExample, make_genai_metric
 
+from evaluate_llm.grading_examples.similarity_grading_examples import GRADING_EXAMPLES
+
 
 def create_grading_example(eval_examples: dict) -> EvaluationExample:
     """Create a grading example for the ethical metric."""
@@ -11,7 +13,7 @@ def create_grading_example(eval_examples: dict) -> EvaluationExample:
     )
 
 
-# examples = [create_grading_example(example) for example in GRADING_EXAMPLES]
+examples = [create_grading_example(example) for example in GRADING_EXAMPLES]
 
 answer_similarity = make_genai_metric(
     name="answer_similarity",
@@ -49,7 +51,7 @@ answer_similarity = make_genai_metric(
         or false.
         """
     ),
-    # examples=examples,
+    examples=examples,
     version="v1",
     model="openai:/gpt-4.1-mini-2025-04-14",
     parameters={
