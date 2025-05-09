@@ -57,7 +57,7 @@ class EvaluateLLMModel:
 
         Also preprocess the dataset with the correct prompt template.
         """
-        squad_pd = pd.DataFrame(data[:5])
+        squad_pd = pd.DataFrame(data[:10])
         answers = pd.json_normalize(squad_pd["answers"])
         squad_pd["answers"] = answers["text"]
         squad_pd["answers"] = squad_pd["answers"].apply(
@@ -81,20 +81,25 @@ class EvaluateLLMModel:
                 targets="answers",
             )
             mlflow.log_input(eval_dataset, context="llm_evaluation")
+            mlflow_model = mlflow.transformers.load_model(
+                self.model_uri,
+            )
+            # Configure model params
+            mlflow_model.model.generation_config.max_new_tokens = 512
+            mlflow_model.model.generation_config.temperature = 0
+            mlflow_model.model.generation_config.do_sample = False
             mlflow.evaluate(
-                model=self.model_uri,
+                model=mlflow_model,
                 data=eval_dataset,
                 predictions="outputs",
                 extra_metrics=[answer_similarity],
                 evaluator_config={"col_mapping": {"inputs": "answers"}},
-                # how to load transformer model from mlflow.
-                # see -> https://www.mlflow.org/docs/latest/llms/transformers/tutorials/fine-tuning/transformers-peft/
             )
 
 
 if __name__ == "__main__":
     # Example usage
-    model_uri = "runs:/ca21d1497bb24fb0a74f7542b2b00bac/model"  # 1B model
+    model_uri = "runs:/57be7000b77448e1891c09bb732a8946/model"  # 1B model
     model_name = "Llama-3.2-1B-Instruct"
     evaluator = EvaluateLLMModel(model_uri, model_name)
     asyncio.run(evaluator.eval_experiment())

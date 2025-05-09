@@ -27,6 +27,8 @@ def log_base_model(model_path: str) -> None:
             model=model,
             tokenizer=tokenizer_no_pad,
             device_map="auto",
+            truncation=True,
+            max_length=1024,
         )
         log.info(f"Logging model: {model_path}")
         logged_model = mlflow.transformers.log_model(

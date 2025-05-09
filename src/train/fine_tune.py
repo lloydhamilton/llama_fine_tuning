@@ -176,7 +176,10 @@ class CustomFineTuner:
         return hf_tokenizer
 
     def fetch_model(self) -> LlamaForCausalLM:
-        """Fetch the Llama model from Huggingface."""
+        """Fetch the Llama model from Huggingface.
+
+        If quantization config is provided, use it.
+        """
         config = dict(
             pretrained_model_name_or_path=self.huggingface_model,
             return_dict=True,
@@ -199,7 +202,14 @@ class CustomFineTuner:
         return model
 
     def train(self, train_dataset: Dataset) -> None:
-        """Training entry point."""
+        """Training entry point.
+
+        Steps:
+            1. Set MLflow experiment
+            2. Fetch model
+            3. Preprocess dataset
+            4. Finetune the model with LoRA.
+        """
         mlflow.set_experiment(f"{self.huggingface_model}-finetune")
         model_to_train = self.fetch_model()
         processed_dataset = train_dataset.map(self.apply_message_template)
@@ -254,7 +264,7 @@ class CustomFineTuner:
             )
 
     def generate_predictions(self, pipeline_model: LlamaForCausalLM, input: str) -> str:
-        """Generate predictions from the model."""
+        """Generate predictions from the model using transformer pipelines."""
         message = [
             {"role": "user", "content": input},
         ]
