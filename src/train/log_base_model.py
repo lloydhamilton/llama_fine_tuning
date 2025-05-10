@@ -40,6 +40,7 @@ def log_base_model(model_path: str) -> None:
                     "content": "What is in front of the Notre Dame Main Building?",
                 },
             ),
+            model_config=dict(max_new_tokens=512, temperature=0, do_sample=False),
         )
         log.info(
             f"Model logged successfully, model path: {logged_model.model_uri}",

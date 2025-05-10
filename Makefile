@@ -11,3 +11,8 @@ all: build-docker
 build-docker:
 	@echo "Building Docker image for $(DOCKER_NAME)..."
 	mlflow models build-docker --model-uri "$(MODEL_URI)" --name "$(DOCKER_NAME)"
+
+.PHONY: run-ollama
+run-ollama:
+	ollama run base_model_llama:latest
+

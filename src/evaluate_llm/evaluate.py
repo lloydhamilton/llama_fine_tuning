@@ -4,28 +4,43 @@ import uuid
 
 import mlflow
 import pandas as pd
-from datasets import load_dataset
 from dotenv import load_dotenv
-from transformers import Pipeline
-from transformers.pipelines.base import Dataset
 
 from evaluate_llm.metrics.answer_similarity import answer_similarity
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 
+SYSTEM_PROMPT = """
+You are an assistant specialising in answering questions about graphs. Answer the
+question by outputting the mathematical formula like the examples below
+ that will generate the answer.
+
+For example:
+
+1. add(add(add(12723, 14215), 15794), 442) = 12723 + 14215 + 15794 + 442
+2. divide(1.6, add(1.6, 53.7)) = 1.6 / (1.6 + 53.7)
+3. divide(subtract(4126, 4197), 4197) = (4126 - 4197) / 4197
+
+Your output must look like add(add(add(12723, 14215), 15794), 442). Do not include
+any other text or explanation.
+"""
+
 
 class EvaluateLLMModel:
-
+    """Class object to encapsulate LLM evaluation."""
     def __init__(self, model_uri: str, model_name: str):
         """Initialize the EvaluateLLMModel class.
 
         Args:
             model_uri (str): The URI of the model to evaluate.
+            model_name (str): The name of the model to evaluate for logging.
         """
         self._model = None
         self._model_name = model_name
         self._model_uri = model_uri
-        self.val_squad_dataset = load_dataset("squad", split="validation")
+        self.val_squad_dataset = pd.read_csv(
+            os.path.join(os.path.dirname(__file__), "../data/val.csv")
+        )
 
     @property
     def model_uri(self) -> str:
@@ -37,69 +52,58 @@ class EvaluateLLMModel:
         """Return the model name."""
         return self._model_name
 
-    @property
-    def model(self) -> Pipeline:
-        """Load the model from the specified URI."""
-        if self._model is None:
-            model = mlflow.transformers.load_model(self._model_uri)
-            self._model = model
-        return self._model
+    def apply_template(self, content: str) -> list[dict[str, str]]:
+        """Apply the prompt template to the input content.
 
-    def apply_template(self, content: str) -> str:
-        """Apply the prompt template to the input content."""
-        messages = [{"role": "user", "content": content}]
-        return self.model.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
+        Still need to do this as the model is not able to do this for us.
+        """
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": content},
+        ]
+        return messages
 
-    def process_dataset(self, data: Dataset) -> pd.DataFrame:
+    def process_dataset(self, data: pd.DataFrame) -> pd.DataFrame:
         """Process the dataset for evaluation.
 
         Also preprocess the dataset with the correct prompt template.
         """
-        squad_pd = pd.DataFrame(data[:10])
-        answers = pd.json_normalize(squad_pd["answers"])
-        squad_pd["answers"] = answers["text"]
-        squad_pd["answers"] = squad_pd["answers"].apply(
-            lambda x: ", ".join(x) if isinstance(x, list) else x
-        )
-        squad_pd["role"] = "user"
-        squad_pd["content"] = squad_pd["question"].apply(self.apply_template)
-        return squad_pd
+        data["inputs"] = data["inputs"].apply(self.apply_template)
+        return data
 
     async def eval_experiment(self) -> None:
+        """Main evaluation entry point."""
         uid = uuid.uuid4().hex[:6]
-        with mlflow.start_run(
-            run_name=f"{self.model_name}-qa-{uid}", tags={"id": uid}
-        ) as run:
+        mlflow.set_experiment(f"{self.model_name}-llm-evaluation")
+        with mlflow.start_run(run_name=f"{self.model_name}-qa-{uid}", tags={"id": uid}):
+            mlflow.langchain.autolog()
             mlflow.log_param("model_uri", self.model_uri)
             mlflow.log_param("model_name", self.model_name)
             eval_dataset = mlflow.data.from_pandas(
                 self.process_dataset(self.val_squad_dataset),
-                source="squad_dataset",
-                name="squad_dataset",
-                targets="answers",
+                source="test.csv",
+                name="test.csv",
+                targets="program_re",
             )
             mlflow.log_input(eval_dataset, context="llm_evaluation")
-            mlflow_model = mlflow.transformers.load_model(
-                self.model_uri,
+            logged_model = mlflow.langchain.log_model(
+                lc_model=self.model_uri,
+                artifact_path="chain",
+                input_example={"inputs": "string"},
             )
-            # Configure model params
-            mlflow_model.model.generation_config.max_new_tokens = 512
-            mlflow_model.model.generation_config.temperature = 0
-            mlflow_model.model.generation_config.do_sample = False
             mlflow.evaluate(
-                model=mlflow_model,
+                model=logged_model.model_uri,
                 data=eval_dataset,
                 predictions="outputs",
                 extra_metrics=[answer_similarity],
-                evaluator_config={"col_mapping": {"inputs": "answers"}},
+                evaluator_config={"col_mapping": {"inputs": "program_re"}},
             )
 
 
 if __name__ == "__main__":
-    # Example usage
-    model_uri = "runs:/57be7000b77448e1891c09bb732a8946/model"  # 1B model
+    BASE_MODEL_PATH = os.path.join(
+        os.path.dirname(__file__), "../models/llama-3.2-1b-instruct/langchain_model.py"
+    )
     model_name = "Llama-3.2-1B-Instruct"
-    evaluator = EvaluateLLMModel(model_uri, model_name)
+    evaluator = EvaluateLLMModel(BASE_MODEL_PATH, model_name)
     asyncio.run(evaluator.eval_experiment())
