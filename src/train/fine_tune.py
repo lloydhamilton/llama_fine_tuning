@@ -17,6 +17,7 @@ from peft import (
     get_peft_model,
     prepare_model_for_kbit_training,
 )
+from system_prompt import SYSTEM_PROMPT
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -31,7 +32,7 @@ load_dotenv("../.env")
 
 # TODO: Write method to get predictions. Early stopping & epochs. MLFLow.
 
-HUGGING_FACE_MODEL = "meta-llama/Llama-3.2-3B-Instruct"
+HUGGING_FACE_MODEL = "meta-llama/Llama-3.2-1B-Instruct"
 CURRENT_DIR = os.path.dirname(__file__)
 q_cfg = QuantoConfig(weights="int8")
 lora_cfg = LoraConfig(
@@ -108,7 +109,7 @@ class CustomFineTuner:
         lora_config = LoraConfig(
             r=16,
             lora_alpha=16,
-            lora_dropout=0,
+            lora_dropout=0.5,
             target_modules=[
                 "q_proj",
                 "k_proj",
@@ -130,15 +131,16 @@ class CustomFineTuner:
     def apply_message_template(input_dataset: dict) -> dict:
         """Preprocess the input dataset to fit expected format.
 
-        See: https://huggingface.co/docs/trl/en/sft_trainer for details.
+        Training data has the following columns:
+        ['table', 'question', 'answer', 'program_re', 'inputs']
+
+        See: https://huggingface.co/docs/trl/en/sft_trainer for details on message
+        templates.
         """
-        answer = input_dataset["answers"]["text"]
-        if isinstance(input_dataset["answers"]["text"], list):
-            answer = input_dataset["answers"]["text"][0]
         message_template = [
-            {"role": "system", "content": input_dataset["context"]},
-            {"role": "user", "content": input_dataset["question"]},
-            {"role": "assistant", "content": answer},
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": input_dataset["inputs"]},
+            {"role": "assistant", "content": input_dataset["program_re"]},
         ]
         return {"messages": message_template}
 
@@ -150,6 +152,14 @@ class CustomFineTuner:
                 1
             ].strip()
         return output_text
+
+    @staticmethod
+    def load_dataset_from_file(file_path: str) -> Dataset:
+        """Load dataset from a file."""
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File {file_path} does not exist.")
+        dataset = load_dataset("csv", data_files=file_path)
+        return dataset
 
     def load_model_from_checkpoints(self, checkpoint_path: str) -> PeftModel:
         """Load model from checkpoint."""
@@ -201,7 +211,7 @@ class CustomFineTuner:
         self.log_trainable_params(model, self.huggingface_model)
         return model
 
-    def train(self, train_dataset: Dataset) -> None:
+    def train(self, train_dataset: Dataset, val_dataset: Dataset) -> None:
         """Training entry point.
 
         Steps:
@@ -210,10 +220,29 @@ class CustomFineTuner:
             3. Preprocess dataset
             4. Finetune the model with LoRA.
         """
-        mlflow.set_experiment(f"{self.huggingface_model}-finetune")
+        mlflow.set_experiment(f"finetune-{self.huggingface_model}")
         model_to_train = self.fetch_model()
-        processed_dataset = train_dataset.map(self.apply_message_template)
-        log.debug(f"Sample dataset: {processed_dataset[0]}")
+
+        # Process training dataset
+        processed_train_dataset = train_dataset.map(self.apply_message_template)
+        mlflow_train_dataset = mlflow.data.from_huggingface(
+            processed_train_dataset,
+            name="train.csv",
+            targets="program_re",
+        )
+        mlflow.log_input(mlflow_train_dataset, context="train_llm_finetuning")
+
+        # Process validation dataset
+        processed_eval_dataset = val_dataset.map(self.apply_message_template)
+        mlflow_val_dataset = mlflow.data.from_huggingface(
+            processed_eval_dataset,
+            name="val.csv",
+            targets="program_re",
+        )
+        mlflow.log_input(mlflow_val_dataset, context="val_llm_finetuning")
+
+        # Finetune the model
+        log.debug(f"Sample dataset: {processed_train_dataset[0]}")
         model_to_train.train()
         training_args = SFTConfig(
             report_to="mlflow",
@@ -223,21 +252,21 @@ class CustomFineTuner:
             gradient_accumulation_steps=1,
             per_device_eval_batch_size=1,
             eval_accumulation_steps=1,
-            # optim = "paged_adamw_32bit",
             save_steps=10,
             logging_steps=10,
             learning_rate=5e-5,
             max_grad_norm=0.3,
-            max_steps=10,
+            max_steps=100,
             warmup_ratio=0.03,
-            # eval_strategy="steps",
+            eval_strategy="steps",  # dont forget to use eval dataset too
             lr_scheduler_type="linear",
             packing=True,
         )
         trainer = SFTTrainer(
             model=model_to_train,
             args=training_args,
-            train_dataset=processed_dataset,
+            train_dataset=processed_train_dataset,
+            eval_dataset=processed_eval_dataset,
             peft_config=self.lora_config,
         )
         trainer.train()
@@ -287,5 +316,14 @@ if __name__ == "__main__":
         huggingface_model=HUGGING_FACE_MODEL,
         lora_config=lora_cfg,
     )
-    dataset = fine_tuner.fetch_huggingface_data("squad")
-    fine_tuner.train(dataset)
+    train_dataset = load_dataset(
+        path="csv",
+        data_files=os.path.join(CURRENT_DIR, "../data/train.csv"),
+        split="train",
+    )
+    eval_dataset = load_dataset(
+        path="csv",
+        data_files=os.path.join(CURRENT_DIR, "../data/val.csv"),
+        split="train",  # use "train" to load the entire dataset
+    )
+    fine_tuner.train(train_dataset, eval_dataset)

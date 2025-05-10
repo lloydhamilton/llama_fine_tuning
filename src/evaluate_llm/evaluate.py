@@ -7,27 +7,14 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from evaluate_llm.metrics.answer_similarity import answer_similarity
+from train.system_prompt import SYSTEM_PROMPT
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
-
-SYSTEM_PROMPT = """
-You are an assistant specialising in answering questions about graphs. Answer the
-question by outputting the mathematical formula like the examples below
- that will generate the answer.
-
-For example:
-
-1. add(add(add(12723, 14215), 15794), 442) = 12723 + 14215 + 15794 + 442
-2. divide(1.6, add(1.6, 53.7)) = 1.6 / (1.6 + 53.7)
-3. divide(subtract(4126, 4197), 4197) = (4126 - 4197) / 4197
-
-Your output must look like add(add(add(12723, 14215), 15794), 442). Do not include
-any other text or explanation.
-"""
 
 
 class EvaluateLLMModel:
     """Class object to encapsulate LLM evaluation."""
+
     def __init__(self, model_uri: str, model_name: str):
         """Initialize the EvaluateLLMModel class.
 
@@ -52,7 +39,8 @@ class EvaluateLLMModel:
         """Return the model name."""
         return self._model_name
 
-    def apply_template(self, content: str) -> list[dict[str, str]]:
+    @staticmethod
+    def apply_template(content: str) -> list[dict[str, str]]:
         """Apply the prompt template to the input content.
 
         Still need to do this as the model is not able to do this for us.
@@ -74,7 +62,7 @@ class EvaluateLLMModel:
     async def eval_experiment(self) -> None:
         """Main evaluation entry point."""
         uid = uuid.uuid4().hex[:6]
-        mlflow.set_experiment(f"{self.model_name}-llm-evaluation")
+        mlflow.set_experiment(f"evaluation-{self.model_name}")
         with mlflow.start_run(run_name=f"{self.model_name}-qa-{uid}", tags={"id": uid}):
             mlflow.langchain.autolog()
             mlflow.log_param("model_uri", self.model_uri)
