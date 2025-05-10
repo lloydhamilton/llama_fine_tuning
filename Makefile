@@ -1,18 +1,21 @@
 # Variables
-MODEL_URI := runs:/c48f992d2c614b12b751174d09f0e8a6/model
-DOCKER_NAME := llama-3.2-3b-instruct
-
-# Default target
-.PHONY: all
-all: build-docker
-
-# Build docker image for the MLflow model
-.PHONY: build-docker
-build-docker:
-	@echo "Building Docker image for $(DOCKER_NAME)..."
-	mlflow models build-docker --model-uri "$(MODEL_URI)" --name "$(DOCKER_NAME)"
-
 .PHONY: run-ollama
 run-ollama:
 	ollama run base_model_llama:latest
 
+.PHONY: build-ollama
+build-ollama:
+	@echo "Building Ollama llama-3.2-3b-instruct base model..."
+	@(cd src/models/llama-3.2-1b-instruct && \
+    	  ollama create llama-3.2-1b-instruct -f Modelfile && \
+    	  echo "Building Ollama llama-3.2-1b-instruct CovFinQA finetuned model..." && \
+    	  cd ../lora && \
+    	  ollama create llama-3.2-1b-instruct-CovFinQA -f Modelfile)
+
+.PHONY: ollama-up-base
+ollama-base:
+	ollama run llama-3.2-1b-instruct:latest
+
+.PHONY: ollama-up-fine-tuned
+ollama-base:
+	ollama run llama-3.2-1b-instruct-CovFinQA:latest

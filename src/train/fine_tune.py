@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime
 
 import mlflow
 import torch
@@ -38,7 +39,7 @@ q_cfg = QuantoConfig(weights="int8")
 lora_cfg = LoraConfig(
     r=16,
     lora_alpha=16,
-    lora_dropout=0,
+    lora_dropout=0.05,
     target_modules=[
         "q_proj",
         "k_proj",
@@ -109,7 +110,7 @@ class CustomFineTuner:
         lora_config = LoraConfig(
             r=16,
             lora_alpha=16,
-            lora_dropout=0.5,
+            lora_dropout=0.05,
             target_modules=[
                 "q_proj",
                 "k_proj",
@@ -247,7 +248,11 @@ class CustomFineTuner:
         training_args = SFTConfig(
             report_to="mlflow",
             run_name=f"{self.huggingface_model}-finetune-{uuid.uuid4().hex[:6]}",
-            output_dir=os.path.join(CURRENT_DIR, "../checkpoints"),
+            output_dir=os.path.join(
+                CURRENT_DIR,
+                "../checkpoints",
+                f"lora-{datetime.now().strftime('%Y-%m-%d_%H-%M')}",
+            ),
             per_device_train_batch_size=1,
             gradient_accumulation_steps=1,
             per_device_eval_batch_size=1,
@@ -258,7 +263,7 @@ class CustomFineTuner:
             max_grad_norm=0.3,
             max_steps=100,
             warmup_ratio=0.03,
-            eval_strategy="steps",  # dont forget to use eval dataset too
+            eval_strategy="steps",
             lr_scheduler_type="linear",
             packing=True,
         )
