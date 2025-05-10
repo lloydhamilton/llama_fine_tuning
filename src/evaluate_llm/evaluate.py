@@ -15,21 +15,34 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 class EvaluateLLMModel:
     """Class object to encapsulate LLM evaluation."""
 
-    def __init__(self, model_uri: str, model_name: str, data_type_tag: str | None):
+    def __init__(
+        self,
+        model_uri: str,
+        model_name: str,
+        data_type_tag: str | None,
+        target_col: str,
+    ):
         """Initialize the EvaluateLLMModel class.
 
         Args:
             model_uri (str): The URI of the model to evaluate.
             model_name (str): The name of the model to evaluate for logging.
             data_type_tag (str): A user generated tag to describe the data type.
+            target_col (str): The target column name containing ground truth.
         """
         self._model = None
         self._model_name = model_name
         self._model_uri = model_uri
         self._data_type_tag = data_type_tag
+        self._target_col = target_col
         self.val_squad_dataset = pd.read_csv(
             os.path.join(os.path.dirname(__file__), "../data/val.csv")
         )
+
+    @property
+    def target_col(self) -> str:
+        """Return the target column name."""
+        return self._target_col
 
     @property
     def data_type_tag(self) -> str:
@@ -63,7 +76,7 @@ class EvaluateLLMModel:
 
         Also preprocess the dataset with the correct prompt template.
         """
-        data["inputs"] = data["inputs"].apply(self.apply_template)
+        data["inputs"] = data[self.target_col].apply(self.apply_template)
         return data
 
     async def eval_experiment(self) -> None:
@@ -95,10 +108,11 @@ class EvaluateLLMModel:
                 predictions="outputs",
                 extra_metrics=[answer_similarity],
                 evaluator_config={"col_mapping": {"inputs": "program_re"}},
+                model_type="question-answering",
             )
 
 
-async def run_evaluation(model_trained_on: str) -> None:
+async def run_evaluation(model_trained_on_tag: str, target_col: str) -> None:
     """Async execution of eval runs."""
     langchain_model_paths = [
         ("../models/llama-3.2-1b-instruct/langchain_model.py", "llama-3.2-1b-instruct"),
@@ -107,7 +121,9 @@ async def run_evaluation(model_trained_on: str) -> None:
     eval_tasks = []
     for path, model_name in langchain_model_paths:
         model_path = os.path.join(os.path.dirname(__file__), path)
-        evaluator = EvaluateLLMModel(model_path, model_name, model_trained_on)
+        evaluator = EvaluateLLMModel(
+            model_path, model_name, model_trained_on_tag, target_col
+        )
         eval_tasks.append(evaluator.eval_experiment())
     await asyncio.gather(*eval_tasks)
 
@@ -126,4 +142,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    asyncio.run(run_evaluation(args.model_trained_on_type_tag))
+    asyncio.run(
+        run_evaluation(args.model_trained_on_type_tag, target_col="table_question")
+    )

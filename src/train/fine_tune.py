@@ -129,7 +129,7 @@ class CustomFineTuner:
         return model
 
     @staticmethod
-    def apply_message_template(input_dataset: dict) -> dict:
+    def apply_message_template(input_dataset: dict, target_col: str) -> dict:
         """Preprocess the input dataset to fit expected format.
 
         Training data has the following columns:
@@ -140,7 +140,7 @@ class CustomFineTuner:
         """
         message_template = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": input_dataset["inputs"]},
+            {"role": "user", "content": input_dataset[target_col]},
             {"role": "assistant", "content": input_dataset["program_re"]},
         ]
         return {"messages": message_template}
@@ -212,8 +212,15 @@ class CustomFineTuner:
         self.log_trainable_params(model, self.huggingface_model)
         return model
 
-    def train(self, train_dataset: Dataset, val_dataset: Dataset) -> None:
+    def train(
+        self, train_dataset: Dataset, val_dataset: Dataset, target_col: str
+    ) -> None:
         """Training entry point.
+
+        Args:
+            train_dataset: The training dataset.
+            val_dataset: The validation dataset.
+            target_col: The target column name containing the ground truth.
 
         Steps:
             1. Set MLflow experiment
@@ -225,7 +232,12 @@ class CustomFineTuner:
         model_to_train = self.fetch_model()
 
         # Process training dataset
-        processed_train_dataset = train_dataset.map(self.apply_message_template)
+        processed_train_dataset = train_dataset.map(
+            self.apply_message_template,
+            fn_kwargs={
+                "target_col": target_col,
+            },
+        )
         mlflow_train_dataset = mlflow.data.from_huggingface(
             processed_train_dataset,
             name="train.csv",
@@ -234,7 +246,12 @@ class CustomFineTuner:
         mlflow.log_input(mlflow_train_dataset, context="train_llm_finetuning")
 
         # Process validation dataset
-        processed_eval_dataset = val_dataset.map(self.apply_message_template)
+        processed_eval_dataset = val_dataset.map(
+            self.apply_message_template,
+            fn_kwargs={
+                "target_col": target_col,
+            },
+        )
         mlflow_val_dataset = mlflow.data.from_huggingface(
             processed_eval_dataset,
             name="val.csv",
@@ -331,4 +348,6 @@ if __name__ == "__main__":
         data_files=os.path.join(CURRENT_DIR, "../data/val.csv"),
         split="train",  # use "train" to load the entire dataset
     )
-    fine_tuner.train(train_dataset, eval_dataset)
+
+    # Train the model with the specified dataset and target column
+    fine_tuner.train(train_dataset, eval_dataset, "table_question")

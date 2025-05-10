@@ -7,10 +7,20 @@ from loguru import logger as log
 CURRENT_DIR = os.path.dirname(__file__)
 
 
-def format_prompt(pre_table: str, table: str, post_table: str, question: str) -> str:
+def pre_post_table_prompt(
+    pre_table: str, table: str, post_table: str, question: str
+) -> str:
     """Format the prompt for the model inputs."""
     return f"""
 Context: {pre_table} \n\n {table} \n\n {post_table}
+Question: {question}
+"""
+
+
+def table_prompt(table: str, question: str) -> str:
+    """Format the prompt for the model inputs."""
+    return f"""
+Context: {table}
 Question: {question}
 """
 
@@ -44,10 +54,14 @@ def process_file(data_path: str) -> pd.DataFrame:
     refined_df = refined_df.dropna()
 
     # Process the input columns with the format_prompt function
-    refined_df["inputs"] = refined_df.apply(
-        lambda row: format_prompt(
+    refined_df["pre_table_post_question"] = refined_df.apply(
+        lambda row: pre_post_table_prompt(
             row["pre_text"], row["table"], row["post_text"], row["question"]
         ),
+        axis=1,
+    )
+    refined_df["table_question"] = refined_df.apply(
+        lambda row: table_prompt(row["table"], row["question"]),
         axis=1,
     )
 
