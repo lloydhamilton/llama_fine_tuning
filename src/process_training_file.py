@@ -64,6 +64,10 @@ def process_file(data_path: str) -> pd.DataFrame:
         lambda row: table_prompt(row["table"], row["question"]),
         axis=1,
     )
+    refined_df["markdown_table_question"] = refined_df.apply(
+        lambda row: table_prompt(row["amt_table"], row["question"]),
+        axis=1,
+    )
 
     return refined_df
 

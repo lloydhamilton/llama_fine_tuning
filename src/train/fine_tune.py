@@ -29,29 +29,11 @@ from transformers import (
 )
 from trl import SFTConfig, SFTTrainer
 
-load_dotenv("../.env")
+load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
 
-# TODO: Write method to get predictions. Early stopping & epochs. MLFLow.
 
-HUGGING_FACE_MODEL = "meta-llama/Llama-3.2-1B-Instruct"
 CURRENT_DIR = os.path.dirname(__file__)
 q_cfg = QuantoConfig(weights="int8")
-lora_cfg = LoraConfig(
-    r=16,
-    lora_alpha=16,
-    lora_dropout=0.05,
-    target_modules=[
-        "q_proj",
-        "k_proj",
-        "v_proj",
-        "o_proj",
-        "gate_proj",
-        "up_proj",
-        "down_proj",
-    ],
-    bias="none",
-    task_type="CAUSAL_LM",
-)
 
 
 class CustomFineTuner:
@@ -62,10 +44,12 @@ class CustomFineTuner:
         huggingface_model: str,
         lora_config: LoraConfig,
         quant_config: QuantoConfig = None,
+        train_on_completions: bool = False,
     ):
         self._huggingface_model_path = huggingface_model
         self._quant_config = quant_config
         self._lora_config = lora_config
+        self._train_on_completions = train_on_completions
         self.tokeniser = self.fetch_huggingface_tokenizer()
         self.model = None
 
@@ -83,6 +67,18 @@ class CustomFineTuner:
     def quantization_config(self) -> QuantoConfig:
         """Get the quantization config."""
         return self._quant_config
+
+    @property
+    def train_on_completions(self) -> bool:
+        """Property to determine if the model is trained on completions."""
+        return self._train_on_completions
+
+    @property
+    def apply_template(self) -> callable:
+        """Get the template to apply to the dataset."""
+        if self.train_on_completions:
+            return self.apply_prompt_completion_template
+        return self.apply_message_template
 
     @staticmethod
     def fetch_huggingface_data(
@@ -129,21 +125,42 @@ class CustomFineTuner:
         return model
 
     @staticmethod
-    def apply_message_template(input_dataset: dict, target_col: str) -> dict:
-        """Preprocess the input dataset to fit expected format.
+    def apply_message_template(
+        input_dataset: dict, input_col: str, target_col: str
+    ) -> dict:
+        """Preprocess the input dataset to fit expected conversational format.
 
         Training data has the following columns:
-        ['table', 'question', 'answer', 'program_re', 'inputs']
+        ['table', 'question', 'answer', 'program_re', 'inputs',
+        'pre_table_post_question', 'table_question']
 
         See: https://huggingface.co/docs/trl/en/sft_trainer for details on message
         templates.
         """
         message_template = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": input_dataset[target_col]},
-            {"role": "assistant", "content": input_dataset["program_re"]},
+            {"role": "user", "content": input_dataset[input_col]},
+            {"role": "assistant", "content": input_dataset[target_col]},
         ]
         return {"messages": message_template}
+
+    @staticmethod
+    def apply_prompt_completion_template(
+        input_dataset: dict, input_col: str, target_col: str
+    ) -> dict:
+        """Preprocess the input dataset to fit expected prompt-completion format.
+
+        Training data has the following columns:
+        ['table', 'question', 'answer', 'program_re', 'inputs',
+        'pre_table_post_question', 'table_question']
+
+        See: https://huggingface.co/docs/trl/en/sft_trainer for details on message
+        templates.
+        """
+        return {
+            "prompt": f"{SYSTEM_PROMPT}\n\n{input_dataset[input_col]}",
+            "completion": input_dataset[target_col],
+        }
 
     @staticmethod
     def extract_assistant_response(output_text: str) -> str:
@@ -213,14 +230,19 @@ class CustomFineTuner:
         return model
 
     def train(
-        self, train_dataset: Dataset, val_dataset: Dataset, target_col: str
+        self,
+        train_dataset: Dataset,
+        val_dataset: Dataset,
+        input_col: str,
+        target_col: str = "program_re",
     ) -> None:
         """Training entry point.
 
         Args:
             train_dataset: The training dataset.
             val_dataset: The validation dataset.
-            target_col: The target column name containing the ground truth.
+            input_col: The target column name containing the input tokens.
+            target_col: The target column name containing the ground truth tokens.
 
         Steps:
             1. Set MLflow experiment
@@ -230,68 +252,84 @@ class CustomFineTuner:
         """
         mlflow.set_experiment(f"finetune-{self.huggingface_model}")
         model_to_train = self.fetch_model()
+        uid = uuid.uuid4().hex[:6]
+        params = {
+            "input_col": input_col,
+            "target_col": target_col,
+            "trained_on_completions": str(self.train_on_completions),
+            "model_uri": self.huggingface_model,
+        }
+        with mlflow.start_run(
+            run_name=f"llama-3.2-1b-{input_col}-{target_col}-{uid}",
+            tags=params,
+        ):
+            mlflow.log_params(params=params)
+            mlflow.log_params(self.lora_config.to_dict())
 
-        # Process training dataset
-        processed_train_dataset = train_dataset.map(
-            self.apply_message_template,
-            fn_kwargs={
-                "target_col": target_col,
-            },
-        )
-        mlflow_train_dataset = mlflow.data.from_huggingface(
-            processed_train_dataset,
-            name="train.csv",
-            targets="program_re",
-        )
-        mlflow.log_input(mlflow_train_dataset, context="train_llm_finetuning")
+            # Process & log training dataset
+            processed_train_dataset = train_dataset.map(
+                self.apply_template,
+                fn_kwargs={
+                    "input_col": input_col,
+                    "target_col": target_col,
+                },
+            )
+            mlflow_train_dataset = mlflow.data.from_huggingface(
+                processed_train_dataset,
+                name="train.csv",
+                targets=target_col,
+            )
+            mlflow.log_input(mlflow_train_dataset, context="train_llm_finetuning")
 
-        # Process validation dataset
-        processed_eval_dataset = val_dataset.map(
-            self.apply_message_template,
-            fn_kwargs={
-                "target_col": target_col,
-            },
-        )
-        mlflow_val_dataset = mlflow.data.from_huggingface(
-            processed_eval_dataset,
-            name="val.csv",
-            targets="program_re",
-        )
-        mlflow.log_input(mlflow_val_dataset, context="val_llm_finetuning")
+            # Process & log validation dataset
+            processed_eval_dataset = val_dataset.map(
+                self.apply_template,
+                fn_kwargs={
+                    "input_col": input_col,
+                    "target_col": target_col,
+                },
+            )
+            mlflow_val_dataset = mlflow.data.from_huggingface(
+                processed_eval_dataset,
+                name="val.csv",
+                targets=target_col,
+            )
+            mlflow.log_input(mlflow_val_dataset, context="val_llm_finetuning")
 
-        # Finetune the model
-        log.debug(f"Sample dataset: {processed_train_dataset[0]}")
-        model_to_train.train()
-        training_args = SFTConfig(
-            report_to="mlflow",
-            run_name=f"{self.huggingface_model}-finetune-{uuid.uuid4().hex[:6]}",
-            output_dir=os.path.join(
-                CURRENT_DIR,
-                "../checkpoints",
-                f"lora-{datetime.now().strftime('%Y-%m-%d_%H-%M')}",
-            ),
-            per_device_train_batch_size=1,
-            gradient_accumulation_steps=1,
-            per_device_eval_batch_size=1,
-            eval_accumulation_steps=1,
-            save_steps=10,
-            logging_steps=10,
-            learning_rate=5e-5,
-            max_grad_norm=0.3,
-            max_steps=100,
-            warmup_ratio=0.03,
-            eval_strategy="steps",
-            lr_scheduler_type="linear",
-            packing=True,
-        )
-        trainer = SFTTrainer(
-            model=model_to_train,
-            args=training_args,
-            train_dataset=processed_train_dataset,
-            eval_dataset=processed_eval_dataset,
-            peft_config=self.lora_config,
-        )
-        trainer.train()
+            # Finetune the model
+            log.debug(f"Sample dataset: {processed_train_dataset[0]}")
+            model_to_train.train()
+            training_args = SFTConfig(
+                report_to="mlflow",
+                run_name=f"{self.huggingface_model}-finetune-{uuid.uuid4().hex[:6]}",
+                output_dir=os.path.join(
+                    CURRENT_DIR,
+                    "../checkpoints",
+                    f"train_on_completions_{str(self.train_on_completions).lower()}",
+                    f"lora-{input_col}-{target_col}-{datetime.now().strftime('%Y-%m-%d_%H-%M')}",
+                ),
+                per_device_train_batch_size=1,
+                gradient_accumulation_steps=1,
+                per_device_eval_batch_size=1,
+                eval_accumulation_steps=1,
+                save_steps=10,
+                logging_steps=10,
+                learning_rate=5e-5,
+                max_grad_norm=0.3,
+                max_steps=100,
+                warmup_ratio=0.03,
+                eval_strategy="steps",
+                lr_scheduler_type="linear",
+                packing=True,
+            )
+            trainer = SFTTrainer(
+                model=model_to_train,
+                args=training_args,
+                train_dataset=processed_train_dataset,
+                eval_dataset=processed_eval_dataset,
+                peft_config=self.lora_config,
+            )
+            trainer.train()
 
     def mlflow_log_model(self, trainer: SFTTrainer) -> None:
         """Log the model to MLflow."""
@@ -334,11 +372,31 @@ class CustomFineTuner:
 
 
 if __name__ == "__main__":
+
+    HUGGING_FACE_MODEL = "meta-llama/Llama-3.2-1B-Instruct"
+    lora_cfg = LoraConfig(
+        r=16,
+        lora_alpha=16,
+        lora_dropout=0.05,
+        target_modules=[
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+        ],
+        bias="none",
+        task_type="CAUSAL_LM",
+    )
+
     fine_tuner = CustomFineTuner(
         huggingface_model=HUGGING_FACE_MODEL,
         lora_config=lora_cfg,
+        train_on_completions=False,
     )
-    train_dataset = load_dataset(
+    training_dataset = load_dataset(
         path="csv",
         data_files=os.path.join(CURRENT_DIR, "../data/train.csv"),
         split="train",
@@ -349,5 +407,18 @@ if __name__ == "__main__":
         split="train",  # use "train" to load the entire dataset
     )
 
-    # Train the model with the specified dataset and target column
-    fine_tuner.train(train_dataset, eval_dataset, "table_question")
+    # Train the model with the specified dataset and target column,
+    # chose of columns are: ['table', 'question', 'answer', 'program_re', 'inputs',
+    # 'pre_table_post_question', 'table_question', 'markdown_table_question']
+    fine_tune_input_output_params = [
+        ("table_question", "program_re"),
+        ("markdown_table_question", "program_re"),
+        ("pre_table_post_question", "program_re"),
+    ]
+    for input_val, output_val in fine_tune_input_output_params:
+        fine_tuner.train(
+            train_dataset=training_dataset,
+            val_dataset=eval_dataset,
+            input_col=input_val,
+            target_col=output_val,
+        )

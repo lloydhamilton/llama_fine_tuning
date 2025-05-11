@@ -1,8 +1,29 @@
-# Tomorrow FinQA
+# CovFinQA
 
 Main dataset: https://github.com/czyssrs/ConvFinQA
 
-## Prerequisites
+This project focuses on fine tuning an LLM to answer questions related to the
+financial domain. The goal is to create a model that can understand and respond to
+questions about financial documents, such as tables and reports.
+
+The core aim of the fine-tuning process is to enhance the model's ability to comprehend
+financial tables and provide an accurate mathematical formula to answer the questions.
+
+For example, for a question:
+
+What was the percentage increase for teleflex incorporated's market performance from 2014-2015?\n
+
+Table: <table class='wikitable'><tr><td>1</td><td>company / index</td><td>2013</td><td>2014</td><td>2015</td><td>2016</td><td>2017</td><td>2018</td></tr><tr><td>2</td><td>teleflex incorporated</td><td>100</td><td>124</td><td>143</td><td>177</td><td>275</td><td>288</td></tr><tr><td>3</td><td>s&p 500 index</td><td>100</td><td>114</td><td>115</td><td>129</td><td>157</td><td>150</td></tr><tr><td>4</td><td>s&p 500 healthcare equipment & supply index</td><td>100</td><td>126</td><td>134</td><td>142</td><td>186</td><td>213</td></tr></table>
+
+Answer: 15.32%
+
+The LLM is fine tuned to create a mathematical program as below:
+
+```
+divide(subtract(143, 124), 124)
+```
+
+## Getting Started on this project
 There are a few pre-requisites to run this repo:
 
 ### Python Environment Setup
@@ -16,15 +37,34 @@ source .venv/bin/activate
 
 This will create a virtual environment and install all the required packages.
 
+### Environment Variables
+Create a `.env` file in the root directory with the following variables:
+
+```env
+HF_TOKEN=<YOUR_HUGGINGFACE_TOKEN>
+TOKENIZERS_PARALLELISM=false
+MLFLOW_TRACKING_URI="http://127.0.0.1:8080"
+OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+```
+
 ### Dataset
 
+I have used DVC to store the data in a public S3 bucket.
 To download the data for this repo, run the following command:
 
 ```bash
 dvc pull
 ```
 
-### Build Ollama Models
+### Exploring Mlflow
+
+To explore the MLflow experiments, you can run the following command:
+
+```bash
+mlflow server --host 127.0.0.1 --port 8080
+```
+
+### Building Ollama Models
 
 You can build the ollama models to interact with the LLMs using the following steps:
 ```bash
