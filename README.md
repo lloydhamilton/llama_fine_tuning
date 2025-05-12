@@ -56,15 +56,6 @@ MLFLOW_TRACKING_URI="http://127.0.0.1:8080"
 OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
 ```
 
-### Dataset
-
-I have used DVC to store the data in a public S3 bucket.
-To download the data for this repo, run the following command:
-
-```bash
-dvc pull
-```
-
 ### Exploring Mlflow
 
 To explore the MLflow experiments, you can run the following command:
@@ -76,23 +67,43 @@ mlflow server --host 127.0.0.1 --port 8080
 This will start the MLflow server on your local machine. 
 You can then access the MLflow UI by navigating to link.
 
+### Downloading the necessary models
+To download the models, you can run the following command:
+
+```bash
+make pull-ollama
+```
+
+#### Available models in this project
+
+- lloydlmhamilton/llama-table_question-program_re:latest
+- lloydlmhamilton/llama-pre_table_post_question-program_re:latest
+- lloydlmhamilton/llama-markdown_table_question-program_re:latest
+
+To run any of these models, you can use the following command:
+
+```bash
+ollama run <model_name>
+```
+
+### Dataset
+
+**NOTE: The model files are not included in the repo due to their size. Download may take
+a while.**
+
+I have used DVC to store the main model in a public S3 bucket.
+To download the data for this repo, run the following command, note you will need
+a default s3 bucket configured in your AWS CLI.:
+
+```bash
+dvc pull
+```
+
 ### Building Ollama Models
 
 You can build the ollama models to interact with the LLMs using the following steps:
 ```bash
 make build-ollama
-```
-
-### Available models in this project
-
-- llama-table_question-program_re
-- llama-pre_table_post_question-program_re
-- llama-markdown_table_question-program_re
-
-To run any of these models, you can use the following command:
-
-```bash
-ollama run <model_name>:latest
 ```
 
 ## Developing
