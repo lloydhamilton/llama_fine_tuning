@@ -17,13 +17,22 @@ Table: <table class='wikitable'><tr><td>1</td><td>company / index</td><td>2013</
 
 Answer: 15.32%
 
-The LLM is fine tuned to create a mathematical program as below:
+The LLM is fine-tuned to create a mathematical program as below:
 
 ```
 divide(subtract(143, 124), 124)
 ```
 
 ## Getting Started on this project
+
+### Tech stack:
+
+- Python
+- LangChain
+- Ollama
+- MLflow
+- DVC
+
 There are a few pre-requisites to run this repo:
 
 ### Python Environment Setup
@@ -64,6 +73,9 @@ To explore the MLflow experiments, you can run the following command:
 mlflow server --host 127.0.0.1 --port 8080
 ```
 
+This will start the MLflow server on your local machine. 
+You can then access the MLflow UI by navigating to link.
+
 ### Building Ollama Models
 
 You can build the ollama models to interact with the LLMs using the following steps:
@@ -71,12 +83,21 @@ You can build the ollama models to interact with the LLMs using the following st
 make build-ollama
 ```
 
+### Available models in this project
+
+- llama-table_question-program_re
+- llama-pre_table_post_question-program_re
+- llama-markdown_table_question-program_re
+
+To run any of these models, you can use the following command:
+
+```bash
+ollama run <model_name>:latest
+```
+
 ## Developing
 
 ### Deploying a Model on Ollama
-
-Ref: 
-- https://medium.com/intro-to-artificial-intelligence/deploy-fine-tuned-quantizedmodel-to-ollama-88781bd1151e
 
 1. Install [Ollama](https://ollama.com)
 2. Clone [Llama.ccp](https://github.com/ggerganov/llama.cpp) 

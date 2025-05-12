@@ -1,8 +1,3 @@
-# Variables
-.PHONY: run-ollama
-run-ollama:
-	ollama run base_model_llama:latest
-
 .PHONY: build-ollama
 build-ollama:
 	@echo "Building Ollama llama-3.2-3b-instruct base model..."
@@ -17,7 +12,3 @@ build-ollama:
 .PHONY: ollama-up-base
 ollama-base:
 	ollama run llama-3.2-1b-instruct:latest
-
-.PHONY: ollama-up-fine-tuned
-ollama-fine-tuned:
-	ollama run llama-3.2-1b-instruct-CovFinQA:latest

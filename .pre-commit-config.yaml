@@ -16,12 +16,3 @@ repos:
   hooks:
   # Update the uv lockfile
   - id: uv-lock
-
-- repo: local
-  hooks:
-  - id: ruff-fix
-    name: ruff-fix
-    entry: ruff check --fix
-    language: system
-    pass_filenames: false
-    always_run: true
