@@ -4,4 +4,4 @@
 ['remote "llm-fine-tuning"']
     url = s3://llm-fine-tuning-dvc/llm-fine-tuning
 ['remote "http-llm-fine-tuning"']
-    url = https://llm-fine-tuning-dvc.s3.amazonaws.com/path
+    url = https://llm-fine-tuning-dvc.s3.amazonaws.com/llm-fine-tuning
