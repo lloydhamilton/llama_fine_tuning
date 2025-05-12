@@ -108,6 +108,24 @@ You can build the ollama models to interact with the LLMs using the following st
 make build-ollama
 ```
 
+## Fine-tuning
+To fine tune the model, you can run the following command:
+
+Ensure you have the MLflow server running and the environment variables set up.
+
+```bash
+python src/train/fine_tune.py
+```
+
+This will start the fine-tuning process and log the results to MLflow.
+
+## Evaluating the model
+To evaluate the model, you can run the following command:
+
+```bash
+python src/evaluate_llm/evaluate.py
+```
+
 ## Developing
 
 ### Deploying a Model on Ollama
