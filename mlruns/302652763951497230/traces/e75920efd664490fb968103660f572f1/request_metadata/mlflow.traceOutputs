@@ -1,0 +1,1 @@
+"total_liquidity_resources = {'2015': '$ 6083', '2016': '$ 9983'}\npercentage_change = ((9983 - 6083) / 6083) * 100\nprint(f\"({percentage_change:.2f})%\")"

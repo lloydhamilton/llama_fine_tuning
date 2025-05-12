@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/821275711990790082/47103583155f40d1a5c7ccd4227bcf34/artifacts
+deleted_time: 1746735829870
+end_time: 1746732527642
+entry_point_name: ''
+experiment_id: '821275711990790082'
+lifecycle_stage: deleted
+run_id: 47103583155f40d1a5c7ccd4227bcf34
+run_name: bouncy-yak-683
+run_uuid: 47103583155f40d1a5c7ccd4227bcf34
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746732500536
+status: 4
+tags: []
+user_id: lloydhamilton

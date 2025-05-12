@@ -1,0 +1,1 @@
+"new_sites = {'2016': 65, '2015': 11595, '2014': 900}\ntotal_new_sites_2015 = add(new_sites['2015'], 11595)\nprint(total_new_sites_2015)"

@@ -1,0 +1,11 @@
+digest: ea55cb88
+name: test.csv
+profile: '{"num_rows": 100, "num_elements": 500}'
+schema: '{"mlflow_colspec": [{"type": "string", "name": "table", "required": true},
+  {"type": "string", "name": "question", "required": true}, {"type": "string", "name":
+  "answer", "required": false}, {"type": "string", "name": "program_re", "required":
+  true}, {"type": "array", "items": {"type": "object", "properties": {"content": {"type":
+  "string", "required": true}, "role": {"type": "string", "required": true}}}, "name":
+  "inputs", "required": true}]}'
+source: '{"uri": "test.csv"}'
+source_type: local

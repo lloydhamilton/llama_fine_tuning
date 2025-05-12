@@ -1,0 +1,13 @@
+digest: 3af2647b
+name: train.csv
+profile: '{"num_rows": 1687, "dataset_size": 3343329, "size_in_bytes": 6667187}'
+schema: '{"mlflow_colspec": [{"type": "string", "name": "table", "required": true},
+  {"type": "string", "name": "question", "required": true}, {"type": "string", "name":
+  "answer", "required": false}, {"type": "string", "name": "program_re", "required":
+  true}, {"type": "string", "name": "amt_table", "required": true}, {"type": "string",
+  "name": "inputs", "required": true}, {"type": "array", "items": {"type": "object",
+  "properties": {"content": {"type": "string", "required": true}, "role": {"type":
+  "string", "required": true}}}, "name": "messages", "required": true}]}'
+source: '{"tags": {"mlflow.user": "lloydhamilton", "mlflow.source.name": "train/fine_tune.py",
+  "mlflow.source.type": "LOCAL", "mlflow.source.git.commit": "1a2c09a75a6ac0d467d71c45c6b1546a7ab1dd2e"}}'
+source_type: code

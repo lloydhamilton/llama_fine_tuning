@@ -1,0 +1,1 @@
+" servicing_fees = 1425\n years_diff = 1\n change_percentage = -12 / 100 * years_diff\n percent_change = (servicing_fees - 1624) / 1624 + change_percentage\n print(percent_change)"

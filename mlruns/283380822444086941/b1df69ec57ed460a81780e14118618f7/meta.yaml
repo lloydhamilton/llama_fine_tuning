@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/b1df69ec57ed460a81780e14118618f7/artifacts
+end_time: 1746947595513
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: b1df69ec57ed460a81780e14118618f7
+run_name: beautiful-fowl-989
+run_uuid: b1df69ec57ed460a81780e14118618f7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746947543655
+status: 3
+tags: []
+user_id: lloydhamilton

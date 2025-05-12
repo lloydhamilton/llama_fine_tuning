@@ -1,0 +1,1 @@
+"def calculate_percentage_change(year1, year2):\n    if year1 == year2:\n        return '0%'\n    else:\n        return f'({100 + ((({year2} - {year1}) / ({year1} + {year2})) * 100)}%)'\n\nprint(calculate_percentage_change('2015', '2016'))"

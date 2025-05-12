@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/53e13a21f4aa4417a7432badc6d20b60/artifacts
+end_time: 1746947679137
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: 53e13a21f4aa4417a7432badc6d20b60
+run_name: rebellious-mule-482
+run_uuid: 53e13a21f4aa4417a7432badc6d20b60
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746947632954
+status: 3
+tags: []
+user_id: lloydhamilton

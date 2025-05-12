@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/0/346842dc30044886b707477799d1adb0/artifacts
+end_time: 1746745574173
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 346842dc30044886b707477799d1adb0
+run_name: Llama-3.2-1B-Instruct-qa-ede4db
+run_uuid: 346842dc30044886b707477799d1adb0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746745555388
+status: 4
+tags: []
+user_id: lloydhamilton

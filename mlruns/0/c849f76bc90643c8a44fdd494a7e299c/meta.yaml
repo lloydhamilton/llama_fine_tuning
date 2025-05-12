@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/0/c849f76bc90643c8a44fdd494a7e299c/artifacts
+deleted_time: 1746741917304
+end_time: 1746720692572
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+run_id: c849f76bc90643c8a44fdd494a7e299c
+run_name: Llama-3.2-1B-Instruct-qa-6d5297
+run_uuid: c849f76bc90643c8a44fdd494a7e299c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746720616512
+status: 3
+tags: []
+user_id: lloydhamilton

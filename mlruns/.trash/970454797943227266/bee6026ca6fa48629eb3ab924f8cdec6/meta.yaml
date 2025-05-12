@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/970454797943227266/bee6026ca6fa48629eb3ab924f8cdec6/artifacts
+deleted_time: 1746891950596
+end_time: 1746872021290
+entry_point_name: ''
+experiment_id: '970454797943227266'
+lifecycle_stage: deleted
+run_id: bee6026ca6fa48629eb3ab924f8cdec6
+run_name: meta-llama/Llama-3.2-1B-Instruct-finetune-7dc211
+run_uuid: bee6026ca6fa48629eb3ab924f8cdec6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746872005087
+status: 3
+tags: []
+user_id: lloydhamilton

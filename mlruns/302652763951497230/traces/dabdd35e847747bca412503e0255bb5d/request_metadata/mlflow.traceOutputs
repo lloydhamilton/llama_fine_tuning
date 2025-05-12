@@ -1,0 +1,1 @@
+"total_value = 1432610 + 1073798\nchange = (total_value - 1913527) / 1913527\npercentage_change = change * 100\nprint(add(add(total_value, percentage_change), 57))"

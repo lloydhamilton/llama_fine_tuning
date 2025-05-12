@@ -1,0 +1,10 @@
+digest: c54f5b3c
+name: squad_dataset
+profile: '{"num_rows": 10570, "num_elements": 73990}'
+schema: '{"mlflow_colspec": [{"type": "string", "name": "id", "required": true}, {"type":
+  "string", "name": "title", "required": true}, {"type": "string", "name": "context",
+  "required": true}, {"type": "string", "name": "question", "required": true}, {"type":
+  "string", "name": "answers", "required": true}, {"type": "string", "name": "role",
+  "required": true}, {"type": "string", "name": "content", "required": true}]}'
+source: '{"uri": "squad_dataset"}'
+source_type: local

@@ -1,0 +1,1 @@
+"reit_index_growth_rate = add(add(subtract(138, 181), subtract(181, 196)), sub(215, 262)) / 215\nprint(\"ReIT Index Growth Rate as of 12/31/2003: \" + str(reit_index_growth_rate))"

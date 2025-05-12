@@ -1,0 +1,10 @@
+digest: 9d99ebfc
+name: test.csv
+profile: '{"num_rows": 5, "num_elements": 30}'
+schema: '{"mlflow_colspec": [{"type": "string", "name": "table", "required": true},
+  {"type": "string", "name": "question", "required": true}, {"type": "string", "name":
+  "answer", "required": true}, {"type": "string", "name": "program_re", "required":
+  true}, {"type": "string", "name": "inputs", "required": true}, {"type": "string",
+  "name": "content", "required": true}]}'
+source: '{"uri": "test.csv"}'
+source_type: local

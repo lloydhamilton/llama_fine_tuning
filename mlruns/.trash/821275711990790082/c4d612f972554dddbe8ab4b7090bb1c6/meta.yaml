@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/821275711990790082/c4d612f972554dddbe8ab4b7090bb1c6/artifacts
+deleted_time: 1746738323966
+end_time: 1746736191915
+entry_point_name: ''
+experiment_id: '821275711990790082'
+lifecycle_stage: deleted
+run_id: c4d612f972554dddbe8ab4b7090bb1c6
+run_name: bemused-elk-316
+run_uuid: c4d612f972554dddbe8ab4b7090bb1c6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746736191526
+status: 4
+tags: []
+user_id: lloydhamilton

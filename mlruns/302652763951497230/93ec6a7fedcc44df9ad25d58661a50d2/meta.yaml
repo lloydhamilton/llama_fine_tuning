@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/302652763951497230/93ec6a7fedcc44df9ad25d58661a50d2/artifacts
+end_time: 1747000158186
+entry_point_name: ''
+experiment_id: '302652763951497230'
+lifecycle_stage: active
+run_id: 93ec6a7fedcc44df9ad25d58661a50d2
+run_name: base-table_question-program_re-ae3aef
+run_uuid: 93ec6a7fedcc44df9ad25d58661a50d2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747000059259
+status: 3
+tags: []
+user_id: lloydhamilton

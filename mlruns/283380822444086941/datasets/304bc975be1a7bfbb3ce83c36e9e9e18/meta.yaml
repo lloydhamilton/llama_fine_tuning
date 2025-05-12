@@ -1,0 +1,16 @@
+digest: 7303f394
+name: val.csv
+profile: '{"num_rows": 211, "dataset_size": 2154858, "size_in_bytes": 4306822}'
+schema: '{"mlflow_colspec": [{"type": "string", "name": "table", "required": true},
+  {"type": "string", "name": "question", "required": true}, {"type": "string", "name":
+  "answer", "required": false}, {"type": "string", "name": "program_re", "required":
+  true}, {"type": "string", "name": "amt_table", "required": true}, {"type": "string",
+  "name": "pre_text", "required": true}, {"type": "string", "name": "post_text", "required":
+  true}, {"type": "string", "name": "pre_table_post_question", "required": true},
+  {"type": "string", "name": "table_question", "required": true}, {"type": "string",
+  "name": "markdown_table_question", "required": true}, {"type": "string", "name":
+  "prompt", "required": true}, {"type": "string", "name": "completion", "required":
+  true}]}'
+source: '{"tags": {"mlflow.user": "lloydhamilton", "mlflow.source.name": "src/train/fine_tune.py",
+  "mlflow.source.type": "LOCAL", "mlflow.source.git.commit": "7dc5a9b1ea4d0cc0ffff95da89ed1b1c468bdc44"}}'
+source_type: code

@@ -1,0 +1,1 @@
+"total = 1425720\nowned = 4337963\nbd = 3\npercent = (bd / total) * 100\nprint(f'{percent}% of owned is {owned} sq ft')"

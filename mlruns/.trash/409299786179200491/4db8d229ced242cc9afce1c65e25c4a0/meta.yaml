@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/409299786179200491/4db8d229ced242cc9afce1c65e25c4a0/artifacts
+deleted_time: 1746891955432
+end_time: 1746827567568
+entry_point_name: ''
+experiment_id: '409299786179200491'
+lifecycle_stage: deleted
+run_id: 4db8d229ced242cc9afce1c65e25c4a0
+run_name: treasured-tern-533
+run_uuid: 4db8d229ced242cc9afce1c65e25c4a0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746827539262
+status: 3
+tags: []
+user_id: lloydhamilton

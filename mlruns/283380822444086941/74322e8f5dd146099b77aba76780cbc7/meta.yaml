@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/74322e8f5dd146099b77aba76780cbc7/artifacts
+end_time: 1746914225637
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: 74322e8f5dd146099b77aba76780cbc7
+run_name: gifted-fish-702
+run_uuid: 74322e8f5dd146099b77aba76780cbc7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746914222551
+status: 3
+tags: []
+user_id: lloydhamilton

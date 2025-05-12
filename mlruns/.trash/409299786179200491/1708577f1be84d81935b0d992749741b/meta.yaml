@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/409299786179200491/1708577f1be84d81935b0d992749741b/artifacts
+deleted_time: 1746891955432
+end_time: 1746742751996
+entry_point_name: ''
+experiment_id: '409299786179200491'
+lifecycle_stage: deleted
+run_id: 1708577f1be84d81935b0d992749741b
+run_name: fearless-tern-978
+run_uuid: 1708577f1be84d81935b0d992749741b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746742623575
+status: 3
+tags: []
+user_id: lloydhamilton

@@ -1,0 +1,1 @@
+"result = add(subtract(15.6, 16.6), subtract(17.8, 18.8)) / 60.5 *100"

@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/f443be7dcf6148b5a6fc16190270f47e/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: f443be7dcf6148b5a6fc16190270f47e
+run_name: dashing-kite-840
+run_uuid: f443be7dcf6148b5a6fc16190270f47e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746916187289
+status: 1
+tags: []
+user_id: lloydhamilton

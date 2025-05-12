@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/e2cdea6e210b4e0d9676069c2a281090/artifacts
+end_time: 1746873092004
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: e2cdea6e210b4e0d9676069c2a281090
+run_name: honorable-ape-368
+run_uuid: e2cdea6e210b4e0d9676069c2a281090
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746872952778
+status: 3
+tags: []
+user_id: lloydhamilton

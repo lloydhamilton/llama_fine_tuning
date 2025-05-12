@@ -1,0 +1,1 @@
+"unrealised_gain_on_available_for_sale_security = 96 / 19\npercent_increase_unrealised_gains = (unrealised_gain_on_available_for_sale_security - 1) / 1000 * 100"

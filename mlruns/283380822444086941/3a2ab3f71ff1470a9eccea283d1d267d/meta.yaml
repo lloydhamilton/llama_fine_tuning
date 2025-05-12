@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/3a2ab3f71ff1470a9eccea283d1d267d/artifacts
+end_time: 1746914364048
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: 3a2ab3f71ff1470a9eccea283d1d267d
+run_name: traveling-yak-460
+run_uuid: 3a2ab3f71ff1470a9eccea283d1d267d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746914311032
+status: 3
+tags: []
+user_id: lloydhamilton

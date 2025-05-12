@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/409299786179200491/57be7000b77448e1891c09bb732a8946/artifacts
+deleted_time: 1746891955432
+end_time: 1746823476327
+entry_point_name: ''
+experiment_id: '409299786179200491'
+lifecycle_stage: deleted
+run_id: 57be7000b77448e1891c09bb732a8946
+run_name: popular-gnu-458
+run_uuid: 57be7000b77448e1891c09bb732a8946
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746823447747
+status: 3
+tags: []
+user_id: lloydhamilton

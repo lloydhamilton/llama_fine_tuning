@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/302652763951497230/cbc82b056ada4102b65b213c2988d082/artifacts
+end_time: 1746949045361
+entry_point_name: ''
+experiment_id: '302652763951497230'
+lifecycle_stage: active
+run_id: cbc82b056ada4102b65b213c2988d082
+run_name: llama-3.2-1b-instruct-CovFinQA-qa-8c25c2
+run_uuid: cbc82b056ada4102b65b213c2988d082
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746949027739
+status: 3
+tags: []
+user_id: lloydhamilton

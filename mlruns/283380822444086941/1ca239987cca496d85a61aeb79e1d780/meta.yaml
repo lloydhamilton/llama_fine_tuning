@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/1ca239987cca496d85a61aeb79e1d780/artifacts
+end_time: 1746948099518
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: 1ca239987cca496d85a61aeb79e1d780
+run_name: able-robin-931
+run_uuid: 1ca239987cca496d85a61aeb79e1d780
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746947742225
+status: 3
+tags: []
+user_id: lloydhamilton

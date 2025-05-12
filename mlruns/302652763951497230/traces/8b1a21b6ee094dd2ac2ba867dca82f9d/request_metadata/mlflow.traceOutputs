@@ -1,0 +1,1 @@
+"number_securities = 4903018\nportion = (number_securities / 1233672) * 100\nprint(number_securities, portion)"

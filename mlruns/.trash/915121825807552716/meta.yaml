@@ -1,0 +1,7 @@
+artifact_location: mlflow-artifacts:/915121825807552716
+creation_time: 1746869093260
+experiment_id: '915121825807552716'
+last_update_time: 1746891952778
+lifecycle_stage: deleted
+name: Llama-3.2-1B-Instruct-llm-evaluation
+tags: {}

@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/409299786179200491/eec5510fa5a84732862d142034397097/artifacts
+deleted_time: 1746891955432
+end_time: 1746831588384
+entry_point_name: ''
+experiment_id: '409299786179200491'
+lifecycle_stage: deleted
+run_id: eec5510fa5a84732862d142034397097
+run_name: kindly-bee-78
+run_uuid: eec5510fa5a84732862d142034397097
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746831585494
+status: 4
+tags: []
+user_id: lloydhamilton

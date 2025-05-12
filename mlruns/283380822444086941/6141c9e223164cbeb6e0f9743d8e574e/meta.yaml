@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/283380822444086941/6141c9e223164cbeb6e0f9743d8e574e/artifacts
+end_time: 1746872654433
+entry_point_name: ''
+experiment_id: '283380822444086941'
+lifecycle_stage: active
+run_id: 6141c9e223164cbeb6e0f9743d8e574e
+run_name: clumsy-dog-919
+run_uuid: 6141c9e223164cbeb6e0f9743d8e574e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746872654369
+status: 3
+tags: []
+user_id: lloydhamilton

@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/409299786179200491/ca21d1497bb24fb0a74f7542b2b00bac/artifacts
+deleted_time: 1746891955432
+end_time: 1746743020439
+entry_point_name: ''
+experiment_id: '409299786179200491'
+lifecycle_stage: deleted
+run_id: ca21d1497bb24fb0a74f7542b2b00bac
+run_name: puzzled-steed-185
+run_uuid: ca21d1497bb24fb0a74f7542b2b00bac
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746743003552
+status: 3
+tags: []
+user_id: lloydhamilton

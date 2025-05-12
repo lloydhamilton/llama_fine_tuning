@@ -1,0 +1,1 @@
+"electric_customers_2007 = 86000 / 95000 *100; print(\"the percent change in electric customers between 2006 and 2007 is\")"

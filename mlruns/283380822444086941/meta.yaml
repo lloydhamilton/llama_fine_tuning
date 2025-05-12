@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/283380822444086941
+creation_time: 1746872136828
+experiment_id: '283380822444086941'
+last_update_time: 1746872136828
+lifecycle_stage: active
+name: finetune-meta-llama/Llama-3.2-1B-Instruct

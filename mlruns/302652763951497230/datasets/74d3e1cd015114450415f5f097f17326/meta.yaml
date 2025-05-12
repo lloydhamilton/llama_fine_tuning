@@ -1,0 +1,15 @@
+digest: 9a68ae7e
+name: test.csv
+profile: '{"num_rows": 5, "num_elements": 50}'
+schema: '{"mlflow_colspec": [{"type": "string", "name": "table", "required": true},
+  {"type": "string", "name": "question", "required": true}, {"type": "string", "name":
+  "answer", "required": true}, {"type": "string", "name": "program_re", "required":
+  true}, {"type": "string", "name": "amt_table", "required": true}, {"type": "string",
+  "name": "pre_text", "required": true}, {"type": "string", "name": "post_text", "required":
+  true}, {"type": "string", "name": "pre_table_post_question", "required": true},
+  {"type": "string", "name": "table_question", "required": true}, {"type": "array",
+  "items": {"type": "object", "properties": {"content": {"type": "string", "required":
+  true}, "role": {"type": "string", "required": true}}}, "name": "inputs", "required":
+  true}]}'
+source: '{"uri": "test.csv"}'
+source_type: local

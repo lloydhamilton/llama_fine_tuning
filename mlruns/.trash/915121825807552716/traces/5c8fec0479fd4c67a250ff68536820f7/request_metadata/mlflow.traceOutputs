@@ -1,0 +1,1 @@
+"total = 1425720\nowned = 60\nbd_total = 55 * 255 + 3 * 31 + 15 * 14 + 121 * 34 + 60 * 106 + 4140420\npercent_bd_owned = (owned / bd_total) * 100"

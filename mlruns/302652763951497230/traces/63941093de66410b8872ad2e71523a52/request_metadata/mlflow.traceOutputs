@@ -1,0 +1,1 @@
+"total_share_based_compensation = add(add(subtract(1000000, 80000), 80000*2), 80000) / 20000"

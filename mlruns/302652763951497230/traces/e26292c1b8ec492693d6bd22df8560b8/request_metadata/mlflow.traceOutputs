@@ -1,0 +1,1 @@
+"all_reit_index = [100, 132, 151, 166, 200, 217, 262, 215, 279, 273, 189, 178, 188]\nhealthcare_reit_index = [154, 186, 189, 273, 279, 278, 188, 179, 185, 176, 170, 165, 160]\n\nreturn sum(all_reit_index) / len(all_reit_index)"

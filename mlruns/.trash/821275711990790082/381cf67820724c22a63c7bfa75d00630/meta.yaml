@@ -1,0 +1,16 @@
+artifact_uri: mlflow-artifacts:/821275711990790082/381cf67820724c22a63c7bfa75d00630/artifacts
+deleted_time: 1746735829870
+end_time: 1746735332516
+entry_point_name: ''
+experiment_id: '821275711990790082'
+lifecycle_stage: deleted
+run_id: 381cf67820724c22a63c7bfa75d00630
+run_name: nervous-deer-964
+run_uuid: 381cf67820724c22a63c7bfa75d00630
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746735332505
+status: 4
+tags: []
+user_id: lloydhamilton

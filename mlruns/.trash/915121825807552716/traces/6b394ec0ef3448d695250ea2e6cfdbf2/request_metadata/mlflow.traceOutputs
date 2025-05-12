@@ -1,0 +1,1 @@
+"new_sites_2015 = {'role': 'user', 'content': \"sum([u.s., asia, eea, latin america])\"}\n\nprint(add(add(new_sites_2015['content'], 6955), 190))"

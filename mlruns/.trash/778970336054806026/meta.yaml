@@ -1,0 +1,7 @@
+artifact_location: mlflow-artifacts:/778970336054806026
+creation_time: 1746891634742
+experiment_id: '778970336054806026'
+last_update_time: 1746913108500
+lifecycle_stage: deleted
+name: evaluation-llama-3.2-1b-instruct-CovFinQA
+tags: {}

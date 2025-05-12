@@ -1,0 +1,1 @@
+"gross_unrecognized_tax_benefits = add(gross_ub_balance_2006, gross_penalties_and_interest_2007) % 100"

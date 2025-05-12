@@ -1,0 +1,1 @@
+"average_balance_2010 = add(add(apply_function(subtract, apply_function(subtract, 1434, 1361), subtract(76, 176)), 3), 8)"
