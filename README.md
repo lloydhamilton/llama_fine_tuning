@@ -95,7 +95,7 @@ a while.**
 
 I have used DVC to store the main model in a public S3 bucket.
 To download the data for this repo, run the following command, note you will need
-a default s3 bucket configured in your AWS CLI.:
+a default s3 credentials configured in your AWS CLI.:
 
 ```bash
 dvc pull
