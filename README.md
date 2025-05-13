@@ -136,7 +136,7 @@ python src/evaluate_llm/evaluate.py
 format.
 4. Convert to gguf format using `llama.cpp`:
 ```bash
-python ../../../llama.cpp/convert_hf_to_gguf.py llama-3.2-1b-instruct --outfile llama-3.2-1b-instruct.gguf
+python llama.cpp/convert_hf_to_gguf.py llama-3.2-1b-instruct --outfile llama-3.2-1b-instruct.gguf
 ```
 5. Convert LoRA adapter to gguf format using `llama.cpp`:
 ```bash
